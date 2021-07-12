@@ -49,7 +49,11 @@
     [(head:id . rest)
      #:do [(define binding (lookup #'head term-macro?))]
      #:when binding
-     (expand-term (term-macro-transform binding stx))]
+     (expand-term
+       (apply-as-transformer (lambda (stx) (term-macro-transform binding stx))
+                             #'head
+                             'expression
+                             stx))]
     
     ; interposition points
     [var:id
@@ -101,7 +105,11 @@
     [(head:id . rest)
      #:do [(define binding (lookup #'head goal-macro?))]
      #:when binding
-     (expand-goal (goal-macro-transform binding stx))]
+     (expand-goal
+       (apply-as-transformer (lambda (stx) (goal-macro-transform binding stx))
+                             #'head
+                             'expression
+                             stx))]
 
     ; interposition points
     [(head:id . rest)
