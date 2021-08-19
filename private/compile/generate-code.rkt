@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require (for-template (prefix-in mk: minikanren)
+(require (for-template (prefix-in mk: "../../mk/mk.rkt")
                        racket/base
                        "../forms.rkt"
                        "../runtime.rkt")
