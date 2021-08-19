@@ -7,7 +7,7 @@
  syntax/id-table
  (for-template "runtime.rkt")
  (for-template racket/base)
- (for-template (prefix-in mk: minikanren))
+ (for-template (prefix-in mk: "../mk/mk.rkt"))
  (only-in syntax/parse [define/syntax-parse def/stx])
  "syntax-classes.rkt"
  "env-rep.rkt"
