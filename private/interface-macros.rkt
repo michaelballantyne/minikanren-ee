@@ -10,7 +10,7 @@
   ee-lib/define
   syntax/parse/define
   racket/math
-  (prefix-in mk: minikanren)
+  (prefix-in mk: "../mk/mk.rkt")
   "forms.rkt"
   "runtime.rkt"
   (for-syntax
