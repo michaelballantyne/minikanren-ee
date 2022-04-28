@@ -25,10 +25,10 @@
   (for/list ([x (syntax->list names)])
     (bind-logic-var! x)))
 
-(define (maybe-implicit form-id ctx-stx)
-  (let ([implicit-id (datum->syntax ctx-stx (syntax-e form-id))])
-    (if (lookup implicit-id (lambda (v) #t))
-        implicit-id
+(define (maybe-interposition form-id ctx-stx)
+  (let ([interposition-id (datum->syntax ctx-stx (syntax-e form-id))])
+    (if (lookup interposition-id (lambda (v) #t))
+        interposition-id
         form-id)))
 
 (define/hygienic (expand-term stx) #:expression
@@ -64,13 +64,13 @@
     ; interposition points
     [var:id
      #:when (lookup #'var logic-var-binding?)
-     (with-syntax ([#%lv-ref (maybe-implicit #'#%lv-ref this-syntax)])
+     (with-syntax ([#%lv-ref (maybe-interposition #'#%lv-ref this-syntax)])
        (expand-term (qstx/rc (#%lv-ref var))))]
     [var:id
-     (with-syntax ([rkt-term (maybe-implicit #'rkt-term this-syntax)])
+     (with-syntax ([rkt-term (maybe-interposition #'rkt-term this-syntax)])
        (expand-term (qstx/rc (rkt-term var))))]
     [(~or* l:number l:boolean l:string)
-     (with-syntax ([#%term-datum (maybe-implicit #'#%term-datum this-syntax)])
+     (with-syntax ([#%term-datum (maybe-interposition #'#%term-datum this-syntax)])
        (expand-term (qstx/rc (#%term-datum l))))]
     
     [_ (raise-syntax-error #f "not a term expression" stx)]))
@@ -120,7 +120,7 @@
     ; interposition points
     [(head:id . rest)
      #:when (lookup #'head relation-binding?)
-     (with-syntax ([#%rel-app (maybe-implicit #'#%rel-app this-syntax)])
+     (with-syntax ([#%rel-app (maybe-interposition #'#%rel-app this-syntax)])
        (expand-goal (qstx/rc (#%rel-app head . rest))))]
     
     [_ (raise-syntax-error
