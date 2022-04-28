@@ -45,28 +45,30 @@
 ; run, run*, and define-relation are the interface with Racket
 
 (define-syntax run
-  (syntax-parser
-    [(~describe
-      "(run <numeric-expr> (<id> ...+) <goal>)"
-      (_ n:expr b:bindings+/c g:goal/c))
-     (with-scope sc
-       (def/stx (x^ ...) (bind-logic-vars! (add-scope #'(b.x ...) sc)))
-       (define expanded (expand-goal (add-scope #'g sc)))
-       (define reordered (reorder-conjunctions expanded))
-       (define compiled (generate-code reordered))
-       #`(mk:run (check-natural n #'n) (x^ ...) #,compiled))]))
+  (expression-macro
+   (syntax-parser
+     [(~describe
+       "(run <numeric-expr> (<id> ...+) <goal>)"
+       (_ n:expr b:bindings+/c g:goal/c))
+      (with-scope sc
+        (def/stx (x^ ...) (bind-logic-vars! (add-scope #'(b.x ...) sc)))
+        (define expanded (expand-goal (add-scope #'g sc)))
+        (define reordered (reorder-conjunctions expanded))
+        (define compiled (generate-code reordered))
+        #`(mk:run (check-natural n #'n) (x^ ...) #,compiled))])))
 
 (define-syntax run*
-  (syntax-parser
-    [(~describe
-      "(run* (<id> ...+) <goal>)"
-      (_ b:bindings+/c g:goal/c))
-     (with-scope sc
-       (def/stx (x^ ...) (bind-logic-vars! (add-scope #'(b.x ...) sc)))
-       (define expanded (expand-goal (add-scope #'g sc)))
-       (define reordered (reorder-conjunctions expanded))
-       (define compiled (generate-code reordered))
-       #`(mk:run* (x^ ...) #,compiled))]))
+  (expression-macro
+   (syntax-parser
+     [(~describe
+       "(run* (<id> ...+) <goal>)"
+       (_ b:bindings+/c g:goal/c))
+      (with-scope sc
+        (def/stx (x^ ...) (bind-logic-vars! (add-scope #'(b.x ...) sc)))
+        (define expanded (expand-goal (add-scope #'g sc)))
+        (define reordered (reorder-conjunctions expanded))
+        (define compiled (generate-code reordered))
+        #`(mk:run* (x^ ...) #,compiled))])))
 
 (define-syntax relation
   (syntax-parser
@@ -98,8 +100,18 @@
          (define tmp #,(syntax-property
                         #'(relation (h.v ...) g)
                         'name #'h.name))
-         (begin-for-syntax
+         (phase1-effect
            (free-id-table-set! compiled-names #'h.name #'tmp)))]))
+
+(define-syntax phase1-effect
+  (syntax-parser
+    [(_ e ...)
+     (if (eq? 'module (syntax-local-context))
+         #'(begin-for-syntax e ...)
+         (begin
+           (syntax-local-eval #'(begin e ...))
+           #'(begin)))]))
+     
 
 (define-syntax-rule
   (define-goal-macro m f)
